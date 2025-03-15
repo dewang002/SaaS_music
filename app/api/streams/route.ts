@@ -23,25 +23,27 @@ export const POST = async (req: NextRequest) => {
             })
         }
         const extractedId = data.url.split('?v=')[1]
+
         const res = await youtubesearchapi.GetVideoDetails(extractedId)
-        console.log({
-            title: res.title,
-            thumbnail: JSON.stringify(res.thumbnail.thumbnails)
-        })
+        
         const thumbnail = res.thumbnail.thumbnails
         const thumbnails = thumbnail.sort((a:{width:number}, b:{width:number})=> a.width < b.width ? -1: 1)//did the sorting here
 
-        const lastone = thumbnails[thumbnails.length-1]
-        const secondtwo = thumbnails[thumbnails.length-2]
+        const bigImg = thumbnails[thumbnails.length-1].url
+        const smallImg = thumbnails[thumbnails.length-2].url
 
         const stream = await prismaClient.stream.create({
             data:{
                 userId: data.creatorId,
                 url: data.url,
                 extractedId,
-                type: "YouTube"
+                type: "YouTube",
+                title: res.title ?? "random title",
+                bigImg: bigImg ?? '',
+                smallImg: smallImg ?? ''
             }
         })
+
         return NextResponse.json({
             msg: "added stream",
             id: stream
