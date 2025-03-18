@@ -3,26 +3,22 @@ import {
   ArrowRight,
   CheckCircle,
   Disc,
-  Facebook,
   Headphones,
-  Instagram,
-  Menu,
   Music,
   Play,
   Radio,
-  Twitter,
   Volume2,
-  Youtube,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { Redirect } from "./component/Redirect";
 
 export default function Home() {
   return (
     <main>
       <AppBar />
-
+      <Redirect />
       <main className="flex flex-col items-center md:px-50 bg-black/95">
         {/* Hero Section */}
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-b from-black to-zinc-900 border-b border-zinc-800">
@@ -63,13 +59,6 @@ export default function Home() {
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <defs>
-                    <linearGradient id="musicGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#ff00ff" />
-                      <stop offset="50%" stop-color="#00ffff" />
-                      <stop offset="100%" stop-color="#ffcc00" />
-                    </linearGradient>
-                  </defs>
 
                   <path
                     d="M12 3V16.28A3.5 3.5 0 1 0 14 19V7h6V3h-8Z"
@@ -397,19 +386,15 @@ export default function Home() {
               <p className="text-sm text-zinc-400">Rediscover the art of listening.</p>
               <div className="flex space-x-4">
                 <Link href="#" className="text-zinc-400 hover:text-purple-400 transition-colors">
-                  <Twitter className="h-5 w-5" />
                   <span className="sr-only">Twitter</span>
                 </Link>
                 <Link href="#" className="text-zinc-400 hover:text-purple-400 transition-colors">
-                  <Instagram className="h-5 w-5" />
                   <span className="sr-only">Instagram</span>
                 </Link>
                 <Link href="#" className="text-zinc-400 hover:text-purple-400 transition-colors">
-                  <Youtube className="h-5 w-5" />
                   <span className="sr-only">YouTube</span>
                 </Link>
                 <Link href="#" className="text-zinc-400 hover:text-purple-400 transition-colors">
-                  <Facebook className="h-5 w-5" />
                   <span className="sr-only">Facebook</span>
                 </Link>
               </div>

@@ -20,55 +20,8 @@ interface Track {
 
 export default function MusicApp() {
   // Sample initial tracks
-  const initialTracks: Track[] = [
-    {
-      id: "1",
-      title: "Blinding Lights",
-      artist: "The Weeknd",
-      thumbnail: "/placeholder.svg?height=80&width=80",
-      youtubeId: "fHI8X4OXluQ",
-      upvotes: 124,
-      downvotes: 12,
-    },
-    {
-      id: "2",
-      title: "As It Was",
-      artist: "Harry Styles",
-      thumbnail: "/placeholder.svg?height=80&width=80",
-      youtubeId: "H5v3kku4y6Q",
-      upvotes: 98,
-      downvotes: 8,
-    },
-    {
-      id: "3",
-      title: "Stay",
-      artist: "The Kid LAROI, Justin Bieber",
-      thumbnail: "/placeholder.svg?height=80&width=80",
-      youtubeId: "kTJczUoc26U",
-      upvotes: 156,
-      downvotes: 14,
-    },
-    {
-      id: "4",
-      title: "Heat Waves",
-      artist: "Glass Animals",
-      thumbnail: "/placeholder.svg?height=80&width=80",
-      youtubeId: "mRD0-GxqHVo",
-      upvotes: 87,
-      downvotes: 9,
-    },
-    {
-      id: "5",
-      title: "Bad Habits",
-      artist: "Ed Sheeran",
-      thumbnail: "/placeholder.svg?height=80&width=80",
-      youtubeId: "orJSJGHjBLI",
-      upvotes: 112,
-      downvotes: 18,
-    },
-  ]
 
-  const [tracks, setTracks] = useState<Track[]>(initialTracks)
+  const [tracks, setTracks] = useState<Track[]>([])
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
@@ -76,7 +29,6 @@ export default function MusicApp() {
   // Sort tracks by upvotes and set initial current track
   useEffect(() => {
     const sortedTracks = [...tracks].sort((a, b) => b.upvotes - a.upvotes)
-    setTracks(sortedTracks)
     if (!currentTrack && sortedTracks.length > 0) {
       setCurrentTrack(sortedTracks[0])
     }
@@ -84,15 +36,22 @@ export default function MusicApp() {
 
   const REFRESH_INTERVAL = 10 * 1000
   const refreshStream = async () => {
-        const res = await fetch(`/api/streams/my`,{
-            method:"GET"
-        });
-        const data = await res.json()
+    try {
+        const res = await fetch('/api/streams/my');
+        if (!res.ok) {
+            throw new Error(`Server responded with ${res.status}: ${res.statusText}`);
+        }
+        const data = await res.json();
         console.log(data)
-  }
-  
+        setTracks(data.stream)
+    } catch (error) {
+        console.error("Failed to refresh streams:", error);
+    }
+};
+
   useEffect(()=>{   
-      refreshStream()
+    refreshStream()
+
     const interval = setInterval(()=>{
 
     },REFRESH_INTERVAL)
@@ -178,14 +137,13 @@ export default function MusicApp() {
               <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
                 {currentTrack && (
                   <iframe
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?autoplay=${isPlaying ? 1 : 0}&mute=${isMuted ? 1 : 0}`}
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${currentTrack.extractedId}?autoplay=${isPlaying ? 1 : 0}&mute=${isMuted ? 1 : 0}`}
+                  title="YouTube video player"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
                 )}
               </div>
 
@@ -195,8 +153,8 @@ export default function MusicApp() {
                   <h2 className="text-2xl font-bold mb-2">Now Playing</h2>
                   {currentTrack ? (
                     <div className="flex items-start gap-4">
-                      <Image
-                        src={currentTrack.thumbnail || "/placeholder.svg"}
+                      <img
+                        src={currentTrack.smallImg}
                         alt={currentTrack.title}
                         width={80}
                         height={80}
@@ -243,7 +201,7 @@ export default function MusicApp() {
           </div>
 
           <div className="grid gap-4">
-            {tracks.map((track) => (
+            {tracks?.map((track) => (
               <Card
                 key={track.id}
                 className={`p-4 transition-all hover:bg-accent/50 ${currentTrack?.id === track.id ? "border-primary bg-primary/5" : ""}`}
@@ -259,7 +217,7 @@ export default function MusicApp() {
                     >
                       <ArrowBigUp className="h-5 w-5" />
                     </Button>
-                    <span className="font-medium text-sm">{track.upvotes - track.downvotes}</span>
+                    <span className="font-medium text-sm">{track._count.upvotes}</span>
                     <Button
                       variant="ghost"
                       size="icon"
