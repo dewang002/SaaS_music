@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card"
 import { ArrowBigUp, ArrowBigDown, Play, Pause, SkipForward, Volume2, VolumeX } from "lucide-react"
 import Image from "next/image"
 import AppBar from "../component/AppBar"
-import axios from "axios"
 
 // Define the music track type
 interface Track {
@@ -86,9 +85,10 @@ export default function MusicApp() {
   const REFRESH_INTERVAL = 10 * 1000
   const refreshStream = async () => {
         const res = await fetch(`/api/streams/my`,{
-            credentials:"include"
+            method:"GET"
         });
-        console.log(res)
+        const data = await res.json()
+        console.log(data)
   }
   
   useEffect(()=>{   
