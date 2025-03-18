@@ -7,15 +7,20 @@ import { ArrowBigUp, ArrowBigDown, Play, Pause, SkipForward, Volume2, VolumeX } 
 import Image from "next/image"
 import AppBar from "../component/AppBar"
 
+type count = {
+  upvotes:number
+}
+
 // Define the music track type
 interface Track {
   id: string
   title: string
   artist: string
-  thumbnail: string
-  youtubeId: string
+  smallImg: string
+  extractedId: string
   upvotes: number
   downvotes: number
+  _count : count
 }
 
 export default function MusicApp() {
@@ -230,8 +235,8 @@ export default function MusicApp() {
 
                   {/* Thumbnail */}
                   <div className="relative cursor-pointer" onClick={() => playTrack(track)}>
-                    <Image
-                      src={track.thumbnail || "/placeholder.svg"}
+                    <img
+                      src={track.smallImg || "/placeholder.svg"}
                       alt={track.title}
                       width={60}
                       height={60}
