@@ -22,9 +22,6 @@ export default function Home() {
   return (
     <main>
       <AppBar />
-      
-      {/* Header */}
-      
 
       <main className="flex flex-col items-center md:px-50 bg-black/95">
         {/* Hero Section */}
@@ -46,7 +43,7 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button on size="lg" className="gap-1 bg-purple-600 hover:bg-purple-700 text-white">
+                  <Button size="lg" className="gap-1 bg-purple-600 hover:bg-purple-700 text-white">
                     Start Listening <Play className="h-4 w-4" />
                   </Button>
                   <Button
@@ -61,30 +58,30 @@ export default function Home() {
               <div className="flex items-center justify-center relative">
                 <div className="absolute w-full h-full bg-purple-500/20 blur-3xl rounded-full"></div>
                 <svg
-    width="600"
-    height="600"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
->
-    <defs>
-        <linearGradient id="musicGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#ff00ff"/>
-            <stop offset="50%" stop-color="#00ffff"/>
-            <stop offset="100%" stop-color="#ffcc00"/>
-        </linearGradient>
-    </defs>
+                  width="600"
+                  height="600"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <defs>
+                    <linearGradient id="musicGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#ff00ff" />
+                      <stop offset="50%" stop-color="#00ffff" />
+                      <stop offset="100%" stop-color="#ffcc00" />
+                    </linearGradient>
+                  </defs>
 
-    <path
-        d="M12 3V16.28A3.5 3.5 0 1 0 14 19V7h6V3h-8Z"
-        fill="url(#musicGradient)">
-        <animate
-            attributeName="opacity"
-            values="0;1;0"
-            dur="2s"
-            repeatCount="indefinite"
-        />
-    </path>
-</svg>
+                  <path
+                    d="M12 3V16.28A3.5 3.5 0 1 0 14 19V7h6V3h-8Z"
+                    fill="url(#musicGradient)">
+                    <animate
+                      attributeName="opacity"
+                      values="0;1;0"
+                      dur="2s"
+                      repeatCount="indefinite"
+                    />
+                  </path>
+                </svg>
 
               </div>
             </div>
