@@ -28,6 +28,11 @@ export const GET = async () => {
                 select:{
                     upvotes: true
                 }
+            },
+            upvotes: {
+                where: {
+                    userId: user.id
+                }
             }
         }
     })
@@ -35,7 +40,8 @@ export const GET = async () => {
     return NextResponse.json({
         stream : stream.map(({_count, ...rest})=>({
             ...rest,
-            _count
+            upvotes : _count,
+            haveUpVoted : rest.upvotes.length ? true : false
         }))
     })
 }

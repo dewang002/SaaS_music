@@ -9,10 +9,15 @@ const upVoteSchema = z.object({
 
 export const POST = async (req: NextRequest) => {
     const session = await getServerSession()
-
+    if (!session?.user?.email) {
+        return NextResponse.json(
+          { message: "Unauthorized" },
+          { status: 403 }
+        );
+    }
     const user = await prismaClient.user.findFirst({
         where: {
-            email: session?.user?.email ?? ""
+            email: session.user.email 
         }
     })
 
@@ -35,9 +40,12 @@ export const POST = async (req: NextRequest) => {
                 }
             }
         })
+        return NextResponse.json({
+            message:"downvote the list"
+        })
 
     } catch (err) {
-        NextResponse.json({
+        return NextResponse.json({
             message: "this action is not allowed"
         })
     }

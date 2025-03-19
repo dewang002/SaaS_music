@@ -26,15 +26,17 @@ export const POST =async (req:NextRequest) => {
 
     try{
         const data = upVoteSchema.parse(await req.json())
-
         await prismaClient.upvotes.create({
             data:{
                 userId: user.id,
                 streamId: data.streamId
             }
         })
+        return NextResponse.json({
+            message: "upvoted the playlist"
+        })
     }catch(err){
-        NextResponse.json({
+        return NextResponse.json({
             message: "this action is not allowed"
         })
     }
