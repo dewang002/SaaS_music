@@ -1,13 +1,7 @@
-export default function({
-    params: {
-        creatorId
-    }
-}:{
-    params: {
-        creatorId: string;
-    }
-}) {
-    return <div>
-        {creatorId}
-    </div>
+import StreamView from "@/app/component/StreamView";
+
+export default function({params: {creatorId}}:{params: {creatorId: string}}) {
+    return <>
+        <StreamView creatorId={creatorId} />
+    </>
 }

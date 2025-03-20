@@ -35,7 +35,7 @@ export const POST =async (req:NextRequest) => {
         return NextResponse.json({
             message: "upvoted the playlist"
         })
-    }catch(err){
+    }catch(e){
         return NextResponse.json({
             message: "this action is not allowed"
         })
