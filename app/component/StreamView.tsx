@@ -14,17 +14,17 @@ type count = {
 // Define the music track type
 interface Track {
   id: string
-  title: string
-  artist: string
-  smallImg: string
   extractedId: string
+  title:string
+  smallImg:string
+  artist: string
   upvotes: { upvotes: number }
   downvotes: number
   _count: count
   haveUpVoted: boolean
 }
 
-export default function StreamView({creatorId}:{creatorId: string}) {
+export default function StreamView({creatorId, nowPlaying=false}:{creatorId: string, nowPlaying: boolean}) {
   const [ytlink, setytLink] = useState('')
   const [tracks, setTracks] = useState<Track[]>([])
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
@@ -47,12 +47,18 @@ export default function StreamView({creatorId}:{creatorId: string}) {
     }
       const data = await res.json();
       setTracks(data.stream)
+
+      setCurrentTrack(prev => {
+        if(currentTrack?.id===data?.currentStream?.id){
+          return prev
+        }
+         return data.currentStream.stream
+      })
+
     } catch (error) {
       console.error("Failed to refresh streams:", error);
     }
   };
-
-  
 
   // Handle voting
   const handleVote = async (id: string, isUpvote: boolean) => {
@@ -98,22 +104,23 @@ export default function StreamView({creatorId}:{creatorId: string}) {
 
   // Play a track
   const playTrack = (track: Track) => {
-    setCurrentTrack(track)
-    setIsPlaying(true)
   }
 
   // Skip to next track
-  const playNextTrack = () => {
-    if (!currentTrack || tracks.length === 0) return
-
-    const currentIndex = tracks.findIndex((track) => track.id === currentTrack.id)
-    const nextIndex = (currentIndex + 1) % tracks.length
-    setCurrentTrack(tracks[nextIndex])
+  const playNextTrack = async() => {
+    const playnext = await fetch(`/api/streams/next`,
+    {
+      method:"GET"
+    })
+    const nextsong = await playnext.json()
+    if(nextsong){
+      setCurrentTrack(nextsong.stream)
+    }
+    setTracks(prevtracks => prevtracks.slice(1))
   }
 
   // Toggle play/pause
   const togglePlayPause = () => {
-    setIsPlaying(!isPlaying)
   }
 
   const handleLink = async () => {
@@ -134,16 +141,9 @@ export default function StreamView({creatorId}:{creatorId: string}) {
     const interval = setInterval(() => {
       refreshStream()
     }, REFRESH_INTERVAL)
-
+    
     return () => clearInterval(interval)
   }, [])
-
-  useEffect(() => {
-    const sortedTracks = [...tracks].sort((a, b) => b.upvotes.upvotes - a.upvotes.upvotes)
-    if (sortedTracks.length > 0) {
-      setCurrentTrack(sortedTracks[0])
-    }
-}, [tracks, currentTrack])
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-background/80">
@@ -165,9 +165,10 @@ export default function StreamView({creatorId}:{creatorId: string}) {
               <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
                 {currentTrack && (
                   <iframe
+                    
                     width="100%"
                     height="100%"
-                    src={`https://www.youtube.com/embed/${currentTrack.extractedId}?autoplay=none}`}
+                    src={`https://www.youtube.com/embed/${currentTrack.extractedId}?autoplay=1`}
                     title="YouTube video player"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
@@ -190,7 +191,6 @@ export default function StreamView({creatorId}:{creatorId: string}) {
                       />
                       <div>
                         <h3 className="text-xl font-semibold">{currentTrack.title}</h3>
-                        <p className="text-muted-foreground">{currentTrack.artist}</p>
                       </div>
                     </div>
                   ) : (
@@ -204,9 +204,11 @@ export default function StreamView({creatorId}:{creatorId: string}) {
                     <Button variant="outline" size="icon" onClick={togglePlayPause} className="rounded-full h-12 w-12">
                       {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
                     </Button>
+                    {nowPlaying && 
                     <Button variant="outline" size="icon" onClick={playNextTrack} className="rounded-full">
                       <SkipForward className="h-5 w-5" />
                     </Button>
+                    }
                   </div>
                 </div>
               </div>
@@ -223,6 +225,7 @@ export default function StreamView({creatorId}:{creatorId: string}) {
 
           <div className="grid gap-4">
             {tracks?.map((track) => (
+              
               <Card
                 key={track.id}
                 className={`p-4 transition-all hover:bg-accent/50 ${currentTrack?.id === track.id ? "border-primary bg-primary/5" : ""}`}
@@ -233,7 +236,7 @@ export default function StreamView({creatorId}:{creatorId: string}) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleVote(track.id, true)}
+                      onClick={() =>!track.haveUpVoted && handleVote(track.id, true)}
                       className="h-8 w-8 rounded-full text-green-500 hover:text-green-600 hover:bg-green-100"
                     >
                       <ArrowBigUp className="h-5 w-5" />

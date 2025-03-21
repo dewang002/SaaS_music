@@ -14,33 +14,40 @@ datasource db {
 }
 
 model User {
-  id       String       @id @default(uuid())
-  email    String       @unique
+  id       String    @id @default(uuid())
+  email    String    @unique
   provider Provider
   streams  Stream[]
   upvotes  Upvotes[]
 }
 
 model Stream {
-  id          String        @id @default(uuid())
-  type        StreamType
-  url         String
-  title       String        @default("")
-  smallImg    String        @default("")
-  bigImg      String        @default("")
-  extractedId String
-  active      Boolean       @default(true)
-  upvotes     Upvotes[]
-  userId      String
-  user        User          @relation(fields: [userId], references: [id])
+  id            String         @id @default(uuid())
+  type          StreamType
+  url           String
+  title         String         @default("")
+  smallImg      String         @default("")
+  bigImg        String         @default("")
+  extractedId   String
+  active        Boolean        @default(true)
+  upvotes       Upvotes[]
+  userId        String
+  user          User           @relation(fields: [userId], references: [id])
+  currentStream CurrentStream?
+}
+
+model CurrentStream {
+  userId   String  @id
+  streamId String? @unique
+  stream   Stream? @relation(fields: [streamId], references: [id])
 }
 
 model Upvotes {
-  id       String       @id @default(uuid())
+  id       String @id @default(uuid())
   streamId String
   userId   String
-  user     User         @relation(fields: [userId], references: [id])
-  streams  Stream       @relation(fields: [streamId], references: [id])
+  user     User   @relation(fields: [userId], references: [id])
+  streams  Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
 
   @@unique([userId, streamId])
 }
@@ -53,4 +60,3 @@ enum StreamType {
 enum Provider {
   Google
 }
-
