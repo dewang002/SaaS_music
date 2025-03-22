@@ -30,6 +30,7 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [playNextLoading, setPlayNextLoading] = useState(false)
 
   // Sort tracks by upvotes and set initial current track
  
@@ -108,15 +109,20 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
 
   // Skip to next track
   const playNextTrack = async() => {
-    const playnext = await fetch(`/api/streams/next`,
-    {
-      method:"GET"
-    })
-    const nextsong = await playnext.json()
-    if(nextsong){
-      setCurrentTrack(nextsong.stream)
-    }
-    setTracks(prevtracks => prevtracks.slice(1))
+    try{
+      setPlayNextLoading(true)
+      const playnext = await fetch(`/api/streams/next`,
+        {
+          method:"GET"
+        })
+        const nextsong = await playnext.json()
+        if(nextsong){
+          setCurrentTrack(nextsong.stream)
+        }
+      }catch(e){
+        console.log("error while playing next ")
+      }
+      setPlayNextLoading(false)
   }
 
   // Toggle play/pause
@@ -206,7 +212,7 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
                     </Button>
                     {nowPlaying && 
                     <Button variant="outline" size="icon" onClick={playNextTrack} className="rounded-full">
-                      <SkipForward className="h-5 w-5" />
+                      {playNextLoading?"...loading":<SkipForward className="h-5 w-5" />}
                     </Button>
                     }
                   </div>

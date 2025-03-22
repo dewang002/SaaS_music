@@ -41,7 +41,7 @@ export const POST = async (req: NextRequest) => {
                 type: "YouTube",
                 title: res.title ?? "random title",
                 bigImg: bigImg ?? '',
-                smallImg: smallImg ?? ''
+                smallImg: smallImg ?? '',
             }
         })
 
@@ -80,7 +80,8 @@ export const GET = async (req: NextRequest) => {
 
     const [stream, activeStream] = await Promise.all([await prismaClient.stream.findMany({
         where: {
-            userId: creatoreId
+            userId: creatoreId,
+            played: false
         },
         include: {
             _count: {
