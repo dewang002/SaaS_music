@@ -1,11 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ArrowBigUp, ArrowBigDown, Play, Pause, SkipForward } from "lucide-react"
+import { ArrowBigUp, ArrowBigDown, Play, SkipForward } from "lucide-react"
 import AppBar from "../component/AppBar"
 import { NextResponse } from "next/server"
+//@ts-ignore
+import YouTubePlayer from 'youtube-player';
+import Image from "next/image"
 
 type count = {
   upvotes: number
@@ -15,8 +18,8 @@ type count = {
 interface Track {
   id: string
   extractedId: string
-  title:string
-  smallImg:string
+  title: string
+  smallImg: string
   artist: string
   upvotes: { upvotes: number }
   downvotes: number
@@ -24,42 +27,43 @@ interface Track {
   haveUpVoted: boolean
 }
 
-export default function StreamView({creatorId, nowPlaying=false}:{creatorId: string, nowPlaying: boolean}) {
+export default function StreamView({ creatorId, nowPlaying = false }: { creatorId: string, nowPlaying: boolean }) {
   const [ytlink, setytLink] = useState('')
   const [tracks, setTracks] = useState<Track[]>([])
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
   const [loading, setLoading] = useState(false)
   const [playNextLoading, setPlayNextLoading] = useState(false)
+  const ytVidoeRef = useRef()
 
   // Sort tracks by upvotes and set initial current track
- 
+
   const REFRESH_INTERVAL = 10 * 1000
 
-  const refreshStream = async () => {
-    try {
-      const res = await fetch(`/api/streams/?creatorId=${creatorId}`);
-      if (!res.ok) {
+  const refreshStream =useCallback(
+    async () => {
+      try {
+        const res = await fetch(`/api/streams/?creatorId=${creatorId}`);
+        if (!res.ok) {
         return NextResponse.json({
-            msg: "error"
-        },{
-            status: 411
+          msg: "error"
+        }, {
+          status: 411
         })
-    }
+      }
       const data = await res.json();
       setTracks(data.stream)
 
       setCurrentTrack(prev => {
-        if(currentTrack?.id===data?.currentStream?.id){
+        if (currentTrack?.id === data?.currentStream?.id) {
           return prev
         }
-         return data.currentStream.stream
+        return data.currentStream.stream
       })
-
-    } catch (error) {
-      console.error("Failed to refresh streams:", error);
+      
+    } catch (_) {
+      console.error("Failed to refresh streams:");
     }
-  };
+  },[creatorId, currentTrack]) 
 
   // Handle voting
   const handleVote = async (id: string, isUpvote: boolean) => {
@@ -108,38 +112,34 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
   }
 
   // Skip to next track
-  const playNextTrack = async() => {
-    try{
+  const playNextTrack = async () => {
+    try {
       setPlayNextLoading(true)
       const playnext = await fetch(`/api/streams/next`,
         {
-          method:"GET"
+          method: "GET"
         })
-        const nextsong = await playnext.json()
-        if(nextsong){
-          setCurrentTrack(nextsong.stream)
-        }
-      }catch(e){
-        console.log("error while playing next ")
+      const nextsong = await playnext.json()
+      if (nextsong) {
+        setCurrentTrack(nextsong.stream)
       }
-      setPlayNextLoading(false)
-  }
-
-  // Toggle play/pause
-  const togglePlayPause = () => {
+    } catch (_) {
+      console.log("error while playing next ")
+    }
+    setPlayNextLoading(false)
   }
 
   const handleLink = async () => {
     setLoading(true)
-   const res = await fetch('http://localhost:3000/api/streams',{
-    method: 'POST',
-    body: JSON.stringify({
-      creatorId: creatorId,
-      url: ytlink
+    const res = await fetch('http://localhost:3000/api/streams', {
+      method: 'POST',
+      body: JSON.stringify({
+        creatorId: creatorId,
+        url: ytlink
+      })
     })
-   })
-   setytLink("")
-   setLoading(false)
+    setytLink("")
+    setLoading(false)
   };
 
   useEffect(() => {
@@ -147,9 +147,30 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
     const interval = setInterval(() => {
       refreshStream()
     }, REFRESH_INTERVAL)
-    
+
     return () => clearInterval(interval)
-  }, [])
+  }, [REFRESH_INTERVAL, refreshStream])
+
+  useEffect(() => {
+    if(!ytVidoeRef.current){
+      return
+    }
+
+    const player = YouTubePlayer(ytVidoeRef.current);
+
+    player.loadVideoById(currentTrack?.extractedId);
+
+    player.playVideo();
+    const eventHandler = (event:any) => {
+      if(event.data === 0){
+        playNextTrack()
+      }
+    }
+    player.on('stateChange', eventHandler);
+  return () => {
+    player.destroy()
+  }
+  },[currentTrack, ytVidoeRef])
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-background/80">
@@ -157,38 +178,43 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
 
       <main className="flex-1 container mx-auto px-4 py-8">
         {/* Main Player Section */}
-        <Button variant="outline" size="sm" onClick={shareTrackList}>
+        <Button className="bg-purple-800 text-white active:scale-95 transition duration-100" variant="outline" size="sm" onClick={shareTrackList}>
           Share Playlist
         </Button>
         <div>
           <input value={ytlink} type="text" onChange={(e) => setytLink(e.target.value)} placeholder=" put the link of youtube here" className="p-2 w-xl h-8 mx-4 border rounded" />
-          <button disabled={loading} className="active:scale-95 px-4 py-2 bg-purple-800 text-white" onClick={handleLink}>{loading?"loading...":"add music"}</button>
+          <button disabled={loading} className="active:scale-95 px-4 py-2 bg-purple-800 text-white" onClick={handleLink}>{loading ? "loading..." : "add music"}</button>
         </div>
         <section className="mb-12">
           <Card className="overflow-hidden bg-card/50 backdrop-blur-sm border-2 border-primary/10">
-            <div className="grid md:grid-cols-[1fr_400px] gap-6 p-6">
+            <div className="grid md:grid-cols-12 gap-6 p-6">
               {/* YouTube Embed */}
-              <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-                {currentTrack && (
-                  <iframe
-                    
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${currentTrack.extractedId}?autoplay=1`}
-                    title="YouTube video player"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                )}
+              <div className="aspect-video col-span-12 md:col-span-6 rounded-lg  ">
+                {currentTrack ? (
+                  <div ref={ytVidoeRef} className="w-full h-full" />
+                  
+                  // <iframe
+                  //   width="100%"
+                  //   height="100%"
+                  //   src={`https://www.youtube.com/embed/${currentTrack.extractedId}?autoplay=1`}
+                  //   title="YouTube video player"
+                  //   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  //   allowFullScreen
+                  // ></iframe>
+                ):<div className="col-span-6 rounded-lg bg-black h-full">
+                  <h1 className="text-white text-center text-xl">Nothing in current track</h1>
+                </div>
+                
+                }
               </div>
 
               {/* Now Playing Info */}
-              <div className="flex flex-col justify-between">
+              <div className="flex md:col-span-6 col-span-12 flex-col justify-between">
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Now Playing</h2>
                   {currentTrack ? (
                     <div className="flex items-start gap-4">
-                      <img
+                      <Image
                         src={currentTrack.smallImg}
                         alt={currentTrack.title}
                         width={80}
@@ -207,13 +233,10 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
                 {/* Player Controls */}
                 <div className="flex items-center justify-between mt-6">
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" onClick={togglePlayPause} className="rounded-full h-12 w-12">
-                      {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
-                    </Button>
-                    {nowPlaying && 
-                    <Button variant="outline" size="icon" onClick={playNextTrack} className="rounded-full">
-                      {playNextLoading?"...loading":<SkipForward className="h-5 w-5" />}
-                    </Button>
+                    {nowPlaying &&
+                      <Button variant="outline" size="icon" onClick={playNextTrack} className="rounded-full">
+                        {playNextLoading ? "...loading" : <SkipForward className="h-5 w-5" />}
+                      </Button>
                     }
                   </div>
                 </div>
@@ -231,7 +254,7 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
 
           <div className="grid gap-4">
             {tracks?.map((track) => (
-              
+
               <Card
                 key={track.id}
                 className={`p-4 transition-all hover:bg-accent/50 ${currentTrack?.id === track.id ? "border-primary bg-primary/5" : ""}`}
@@ -242,7 +265,7 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() =>!track.haveUpVoted && handleVote(track.id, true)}
+                      onClick={() => !track.haveUpVoted && handleVote(track.id, true)}
                       className="h-8 w-8 rounded-full text-green-500 hover:text-green-600 hover:bg-green-100"
                     >
                       <ArrowBigUp className="h-5 w-5" />
@@ -260,7 +283,7 @@ export default function StreamView({creatorId, nowPlaying=false}:{creatorId: str
 
                   {/* Thumbnail */}
                   <div className="relative cursor-pointer" onClick={() => playTrack(track)}>
-                    <img
+                    <Image
                       src={track.smallImg || "/placeholder.svg"}
                       alt={track.title}
                       width={140}

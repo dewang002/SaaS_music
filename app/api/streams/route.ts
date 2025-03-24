@@ -5,7 +5,7 @@ import { z } from 'zod'
 import youtubesearchapi from "youtube-search-api";
 import { getServerSession } from 'next-auth';
 
-export const YT_regex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com\/(?:watch\?(?!.*\blist=)(?:.*&)?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&]\S+)?$/
+export const YT_regex:RegExp = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com\/(?:watch\?(?!.*\blist=)(?:.*&)?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&]\S+)?$/
 
 const CreateStreamSchema = z.object({
     creatorId: z.string(),
@@ -50,8 +50,7 @@ export const POST = async (req: NextRequest) => {
             id: stream
         })
 
-    } catch (err) {
-        console.log(err)
+    } catch (_) {
         return NextResponse.json({
             message: "Error while adding a stream"
         }, {

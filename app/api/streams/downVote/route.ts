@@ -44,7 +44,7 @@ export const POST = async (req: NextRequest) => {
             message:"downvote the list"
         })
 
-    } catch (err) {
+    } catch (_) {
         return NextResponse.json({
             message: "this action is not allowed"
         })

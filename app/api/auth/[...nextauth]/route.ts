@@ -22,8 +22,8 @@ const handler = NextAuth({
                         provider:'Google'
                     }
                 })
-            }catch(e){
-
+            }catch(_){
+                console.log("some thing went wrong")
             }
             return true;
         }
