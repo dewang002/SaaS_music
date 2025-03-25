@@ -1,12 +1,13 @@
-import GoogleProvider from "next-auth/providers/google";
-import NextAuth from "next-auth";
 import prisma from "@/app/lib/db";
-import Credentials from "next-auth/providers/credentials";
 import { emailSchema, passwordSchema } from "@/schema/Credential_Schema";
-import bcrypt from "bcryptjs";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
+import bcrypt from "bcryptjs";
+import Credentials from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
-const handler = NextAuth({
+
+
+export const authOptions = {
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -54,25 +55,6 @@ const handler = NextAuth({
                         return newUser;
                     }
 
-                    if (!user.password) {
-                        const hashedPassword = await bcrypt.hash(passwordValidation.data, 10);
-
-                        const authUser = await prisma.user.update({
-                            where: {
-                                email: emailValidation.data
-                            },
-                            data: {
-                                password: hashedPassword
-                            }
-                        });
-                        return authUser;
-                    }
-
-                    const passwordVerification = await bcrypt.compare(passwordValidation.data, user.password);
-
-                    if (!passwordVerification) {
-                        throw new Error("Invalid password");
-                    }
                     return user
                 } catch (error) {
                     if (error instanceof PrismaClientInitializationError) {
@@ -89,7 +71,7 @@ const handler = NextAuth({
     },
     secret: process.env.NEXTAUTH_SECRET ?? "secret",
     callbacks: {
-        async signIn(params) {
+        async signIn(params:any) {
             if (!params.user.email) {
                 return false;
             }
@@ -100,12 +82,11 @@ const handler = NextAuth({
                         provider: 'Google'
                     }
                 })
+                return true
             } catch {
 
             }
             return true;
         }
     }
-})
-
-export { handler as GET, handler as POST }
+}
