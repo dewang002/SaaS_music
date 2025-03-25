@@ -34,9 +34,6 @@ model Stream {
   createAt      DateTime       @default(now())
   extractedId   String
   upvotes       Upvotes[]
-  played        Boolean        @default(false)
-  playedTs      DateTime?
-  createAt      DateTime       @default(now())
   userId        String
   user          User           @relation(fields: [userId], references: [id])
   currentStream CurrentStream?
