@@ -1,7 +1,13 @@
+"use client"
 import StreamView from "@/app/component/StreamView";
 
-export default function({params: {creatorId}}:{params: {creatorId: string}}) {
-    return <>
-        <StreamView creatorId={creatorId} nowPlaying={false} />
-    </>
+interface PageProps {
+  params: {
+    creatorId: string;
+  };
 }
+
+export default function CreatorPage({ params }: PageProps) {
+  return <StreamView creatorId={params.creatorId} nowPlaying={false} />;
+}
+

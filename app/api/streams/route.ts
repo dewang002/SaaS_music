@@ -1,11 +1,10 @@
 import { prismaClient } from '@/app/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-//@ts-ignore
+// @ts-expect-error: YouTubeSearchApi might not have TypeScript definitions
 import youtubesearchapi from "youtube-search-api";
 import { getServerSession } from 'next-auth';
-
-export const YT_regex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com\/(?:watch\?(?!.*\blist=)(?:.*&)?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&]\S+)?$/
+const YT_regex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com\/(?:watch\?(?!.*\blist=)(?:.*&)?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&]\S+)?$/
 
 const CreateStreamSchema = z.object({
     creatorId: z.string(),
@@ -50,8 +49,7 @@ export const POST = async (req: NextRequest) => {
             id: stream
         })
 
-    } catch (err) {
-        console.log(err)
+    } catch {
         return NextResponse.json({
             message: "Error while adding a stream"
         }, {
@@ -80,7 +78,8 @@ export const GET = async (req: NextRequest) => {
 
     const [stream, activeStream] = await Promise.all([await prismaClient.stream.findMany({
         where: {
-            userId: creatoreId
+            userId: creatoreId,
+            played: false
         },
         include: {
             _count: {

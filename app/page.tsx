@@ -160,8 +160,8 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold text-white">Midnight Echo</h3>
                   <p className="text-zinc-400">
-                    "VinylVerse has connected me with listeners who truly appreciate the craft behind my synthwave
-                    productions."
+                    VinylVerse has connected me with listeners who truly appreciate the craft behind my synthwave
+                    productions.
                   </p>
                 </div>
                 <Button variant="outline" className="mt-4 border-zinc-700 hover:bg-zinc-800 hover:text-purple-400">
@@ -182,8 +182,8 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold text-white">Analog Dreams</h3>
                   <p className="text-zinc-400">
-                    "I love how VinylVerse lets me organize my tracks like sides of a record. It's brought back the
-                    album experience."
+                    I love how VinylVerse lets me organize my tracks like sides of a record. It &apos s brought back the
+                    album experience.
                   </p>
                 </div>
                 <Button variant="outline" className="mt-4 border-zinc-700 hover:bg-zinc-800 hover:text-purple-400">
@@ -204,8 +204,8 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold text-white">Cassette Culture</h3>
                   <p className="text-zinc-400">
-                    "The direct support from fans has allowed me to invest in vintage equipment and create more
-                    authentic lo-fi sounds."
+                    The direct support from fans has allowed me to invest in vintage equipment and create more
+                    authentic lo-fi sounds.
                   </p>
                 </div>
                 <Button variant="outline" className="mt-4 border-zinc-700 hover:bg-zinc-800 hover:text-purple-400">
