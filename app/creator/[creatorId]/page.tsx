@@ -1,4 +1,5 @@
 "use client"
+"use client"
 import StreamView from "@/app/component/StreamView";
 
 interface PageProps {
